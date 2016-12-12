@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python docker",
+            "type": "python",
+            "request": "attach",
+            "localRoot": "${workspaceRoot}",
+            "remoteRoot": "/work",
+            "preLaunchTask": null,
+            "host": "localhost",
+            "port": 3000,
+            //"secret":
+        }
+    ]
+}
