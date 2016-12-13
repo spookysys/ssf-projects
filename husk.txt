@@ -1,0 +1,74 @@
+# mpi and docker
+https://raw.githubusercontent.com/oweidner/docker.openmpi/master/Dockerfile
+
+Can be mounted by multiple writers:
+* NFS - You must have your own NFS server running with the share exported before you can use it
+* GlusterFS - You must have your own GlusterFS installation running before you can use it
+* CephFS - You must have your own Ceph server running with the share exported before you can use it
+* Quobyte - I assume this has multiple writers
+
+
+# Work-queue stuff:
+http://kubernetes.io/docs/user-guide/jobs/work-queue-1/
+
+
+# Specify command and arguments
+The command overrides the Docker container’s Entrypoint. Command arguments (corresponding to Docker’s Cmd) may be specified using args, as follows:
+    command: ["/bin/echo"]
+    args: ["hello","world"]
+
+# Environment variables and variable expansion
+Kubernetes does not automatically run commands in a shell (not all images contain shells). If you would like to run your command in a shell, such as to expand environment variables (specified using env), you could do the following:
+    apiVersion: v1
+    kind: Pod
+    metadata:
+    name: hello-world
+    spec:  # specification of the pod’s contents
+    restartPolicy: Never
+    containers:
+    - name: hello
+        image: "ubuntu:14.04"
+        env:
+        - name: MESSAGE
+        value: "hello world"
+        command: ["/bin/sh","-c"]
+        args: ["/bin/echo \"${MESSAGE}\""]
+However, a shell isn’t necessary just to expand environment variables. Kubernetes will do it for you if you use $(ENVVAR) syntax:
+    command: ["/bin/echo"]
+    args: ["$(MESSAGE)"]
+
+
+# Using kubectl exec to open a bash terminal in a pod
+After all, open a terminal in a pod is the most direct way to introspect the pod. Assuming the pod/storage is still running, run
+$ kubectl exec -ti storage -- bash
+root@storage:/data#
+
+
+
+# sett zone
+gcloud config set compute/zone europe-west1-d
+
+# begynn å bruk kubernetes:
+gcloud auth application-default login
+gcloud container clusters get-credentials small (?)
+kubectl proxy
+http://localhost:8001/ui
+
+# Start remote interactive python shell in a job+pod
+kubectl run py-console --image=simsofast/py --restart=OnFailure --rm -it  
+
+# Start remote interactive python shell in a pod
+kubectl run py-console --image=simsofast/py --restart=Never --rm -it  
+
+# start deployment/job og override noe (feks spec.containers.command, og kanskje volumting? )
+kubectl run nginx --image=nginx --overrides='{ "apiVersion": "v1", "spec": { ... } }'
+
+# Start the nginx container using the default command, but use custom arguments (arg1 .. argN) for that command.
+kubectl run nginx --image=nginx -- <arg1> <arg2> ... <argN>
+
+# Start the nginx container using a different command and custom arguments.
+kubectl run nginx --image=nginx --command -- <cmd> <arg1> ... <argN>
+
+Use this when using "run":
+--restart='Always': The restart policy for this Pod.  Legal values [Always, OnFailure, Never].  If set to 'Always' a deployment is created for this pod, if set to 'OnFailure', a job is created for this pod, if set to 'Never', a regular pod is created. For the latter two --replicas must be 1.  Default 'Always'
+
